@@ -66,7 +66,7 @@ public class Main extends Application {
         root.getChildren().add(window2);
 
         // stars
-        double starSize = WIDTH*0.025;
+        double starSize = WIDTH*0.025; // WIDTH 800/40
         Rectangle star1 = new Rectangle(WIDTH*0.03, HEIGHT*0.2, starSize, starSize);
         star1.setFill(Color.YELLOW);
         Rectangle star2 = new Rectangle(WIDTH*0.20, WIDTH*0.03, starSize, starSize);
