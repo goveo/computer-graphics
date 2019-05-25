@@ -34,7 +34,7 @@ public class Basketball extends JFrame {
 
         root = new BranchGroup();
 
-//        addImageBackground();
+        addImageBackground();
 
         addDirectionalLightToUniverse();
         addAmbientLightToUniverse();
@@ -55,7 +55,6 @@ public class Basketball extends JFrame {
     // start initialization
 
     private void configureWindow() {
-        setTitle("Mini Game");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
@@ -72,7 +71,7 @@ public class Basketball extends JFrame {
     }
 
     private void addImageBackground() {
-        TextureLoader t = new TextureLoader("source_folder/track.png", canvas);
+        TextureLoader t = new TextureLoader("assets/street.jpg", canvas);
         Background background = new Background(t.getImage());
         background.setImageScaleMode(Background.SCALE_FIT_ALL);
         BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
@@ -111,12 +110,12 @@ public class Basketball extends JFrame {
 
 
     private TransformGroup getPostGroup() throws IOException {
-        Shape3D post = getModelShape3D("basketball_post", "source_folder/Basketball_Post.obj");
+        Shape3D post = getModelShape3D("basketball_post", "assets/Basketball_Post.obj");
 
         Transform3D transform3D = new Transform3D();
         transform3D.setScale(new Vector3d(0.8f, 0.8f, 0.8f));
 
-//        TextureLoader loader = new TextureLoader("source_folder/stone.jpg", "RGP", new Container());
+//        TextureLoader loader = new TextureLoader("assets/stone.jpg", "RGP", new Container());
 //        Texture texture = loader.getTexture();
 //        texture.setBoundaryModeS(Texture.WRAP);
 //        texture.setBoundaryModeT(Texture.WRAP);
@@ -132,7 +131,7 @@ public class Basketball extends JFrame {
         rotationY.rotY(Math.PI/4);
         transform3D.mul(rotationY);
 
-        transform3D.setTranslation(new Vector3f(-1, 0, 0));
+        transform3D.setTranslation(new Vector3f(-1.1f, -0.3f, 0));
 
         TransformGroup group = getModelGroup(post);
         group.setTransform(transform3D);
@@ -141,10 +140,19 @@ public class Basketball extends JFrame {
     }
 
     private TransformGroup getBallGroup() throws IOException {
-        Shape3D ball = getModelShape3D("ball", "source_folder/ball.obj");
-//        Appearance ballAppearance = new Appearance();
-//        ballAppearance.setMaterial(getMaterial(Color.WHITE,Color.BLACK));
-//        ball.setAppearance(ballAppearance);
+        Shape3D ball = getModelShape3D("ball", "assets/ball.obj");
+        Appearance ballAppearance = new Appearance();
+
+        Material material = new Material();
+        material.setEmissiveColor(new Color3f(0.2f, 0.1f, 0));
+        material.setAmbientColor(new Color3f(0.5f, 0.2f, 0));
+//        material.setDiffuseColor(new Color3f(10,25,71));
+//        material.setSpecularColor(new Color3f(122,52,10));
+//        material.setShininess(128);
+        material.setLightingEnable(true);
+
+        ballAppearance.setMaterial(material);
+        ball.setAppearance(ballAppearance);
 
         Transform3D transform3D = new Transform3D();
         transform3D.setScale(new Vector3d(0.07f, 0.07f, 0.07f));
@@ -205,14 +213,14 @@ public class Basketball extends JFrame {
         return texture;
     }
 
-    Material getMaterial(Color emissiveColor, Color defaultColor) {
+    Material getMaterial(Color emissiveColor, Color ambientColor, Color diffuseColor, Color specularColor) {
         Material material = new Material();
         material.setEmissiveColor(new Color3f(emissiveColor));
-        material.setAmbientColor(new Color3f(defaultColor));
-        material.setDiffuseColor(new Color3f(defaultColor));
-        material.setSpecularColor(new Color3f(defaultColor));
-        material.setShininess(64);
-        material.setLightingEnable(true);
+        material.setAmbientColor(new Color3f(ambientColor));
+        material.setDiffuseColor(new Color3f(diffuseColor));
+        material.setSpecularColor(new Color3f(specularColor));
+//        material.setShininess(64);
+//        material.setLightingEnable(true);
         return material;
     }
 

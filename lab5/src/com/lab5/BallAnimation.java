@@ -10,6 +10,8 @@ import javax.swing.Timer;
 import javax.vecmath.*;
 
 public class BallAnimation implements ActionListener, KeyListener {
+    private static final float speed = 0.01f;
+    private static final float rotationSpeed = 0.03f;
     private TransformGroup ball;
     private Transform3D transform3D = new Transform3D();
 
@@ -20,8 +22,8 @@ public class BallAnimation implements ActionListener, KeyListener {
     private boolean space = false;
 
     private float x = 0;
-    private float y = 0;
-    private int angle = 0;
+    private float y = 0; private int angle = 0;
+
     private float radius = 1f;
     private double scale = 1;
     private double delta = 0.01;
@@ -29,39 +31,30 @@ public class BallAnimation implements ActionListener, KeyListener {
     public BallAnimation(TransformGroup ball) {
         this.ball = ball;
         this.ball.getTransform(this.transform3D);
-                
+
+        x = (float)(radius * Math.sin(Math.toRadians(angle)));
+        y = (float)(-radius * Math.cos(Math.toRadians(angle)));
+        transform3D.setTranslation(new Vector3f(x, y, 0));
+        ball.setTransform(transform3D);
+
+        System.out.println(ball.getBounds());
+
         Timer timer = new Timer(10, this);
         timer.start();
     }
 
     private void Move() {
   	  	if (w) {
-  	  		y += 0.01f;
-//            Transform3D rotation = new Transform3D();
-//            rotation.rotZ(0.05f);
-//            transform3D.mul(rotation);
-  	  	} else {
-//            y -= 0.01f;
-//            Transform3D rotation = new Transform3D();
-//            rotation.rotZ(-0.05f);
-//            transform3D.mul(rotation);
-        }
-
-  	  	if (s) {
-			y -= 0.01f;
-	  	}
-
-        if (a) {
-			x -= 0.01f;
-        }
-
-        if (d) {
-        	x += 0.01f;
-        }
-
-        if (space) {
+  	  		y += speed;
+  	  	} else if (s) {
+			y -= speed;
+	  	} else if (a) {
+			x -= speed;
+        } else if (d) {
+        	x += speed;
+        } else if (space) {
             Transform3D rotation = new Transform3D();
-            rotation.rotX(-0.02f);
+            rotation.rotX(-rotationSpeed);
             transform3D.mul(rotation);
 
             transform3D.setTranslation(new Vector3f(x, y, 0));
@@ -78,6 +71,7 @@ public class BallAnimation implements ActionListener, KeyListener {
             y = (float)(-radius * Math.cos(Math.toRadians(angle)));
             angle++;
         }
+        transform3D.setTranslation(new Vector3f(x, y, 0));
         ball.setTransform(transform3D);
     }
     
@@ -99,11 +93,6 @@ public class BallAnimation implements ActionListener, KeyListener {
     }
     
     @Override
-    public void keyTyped(KeyEvent e) {
-    	//just do nothing please
-    }
-    
-    @Override
     public void keyReleased(KeyEvent ev) {
     	switch (ev.getKeyChar()) {
 	    	case 'w': w = false; break;
@@ -112,5 +101,10 @@ public class BallAnimation implements ActionListener, KeyListener {
 	    	case 'd': d = false; break;
             case ' ': space = false; break;
     	}
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        //just do nothing please
     }
 }
