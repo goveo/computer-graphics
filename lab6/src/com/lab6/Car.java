@@ -12,25 +12,24 @@ import java.util.Enumeration;
 import com.sun.j3d.utils.geometry.Sphere;
 
 public class Car extends JFrame{
-    public Canvas3D myCanvas3D;
+    private static Canvas3D canvas;
 
     public Car(){
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        myCanvas3D = new Canvas3D(SimpleUniverse.getPreferredConfiguration());
-        SimpleUniverse universe = new SimpleUniverse(myCanvas3D);
+        canvas = new Canvas3D(SimpleUniverse.getPreferredConfiguration());
+        SimpleUniverse universe = new SimpleUniverse(canvas);
         universe.getViewingPlatform().setNominalViewingTransform();
 
-        // set the geometry and transformations
         createSceneGraph(universe);
         addLight(universe);
 
-        OrbitBehavior ob = new OrbitBehavior(myCanvas3D);
+        OrbitBehavior ob = new OrbitBehavior(canvas);
         ob.setSchedulingBounds(new BoundingSphere(new Point3d(0.0,0.0,0.0),Double.MAX_VALUE));
         universe.getViewingPlatform().setViewPlatformBehavior(ob);
 
         configureWindow();
 
-        getContentPane().add("Center", myCanvas3D);
+        getContentPane().add("Center", canvas);
         setVisible(true);
     }
 
@@ -44,7 +43,7 @@ public class Car extends JFrame{
         Transform3D startTransformation = new Transform3D();
         startTransformation.setScale(1.0/4);
         Transform3D combinedStartTransformation = new Transform3D();
-        combinedStartTransformation.rotY(-3*Math.PI/2);
+        combinedStartTransformation.rotY(-1*Math.PI/2);
         combinedStartTransformation.mul(startTransformation);
 
         return new TransformGroup(combinedStartTransformation);
@@ -55,7 +54,7 @@ public class Car extends JFrame{
         ObjectFile f = new ObjectFile(ObjectFile.RESIZE);
         String name;
         BranchGroup carBranchGroup = new BranchGroup();
-        Background carBackground = new Background(new Color3f(1.0f,1.0f,1.0f));
+        Background carBackground = new Background(new Color3f(0.0f,0.5f,0.5f));
 
         Scene carScene = null;
         try {
@@ -83,16 +82,16 @@ public class Car extends JFrame{
 
         // wheel 1
         Shape3D wheel1 = (Shape3D) namedObjects.get("wheel1");
-        TransformGroup wheelTG1 = getWheelTG(movesCount, startTime, movesDuration, wheel1, true);
+        TransformGroup wheelTG1 = getWheelTG(wheel1, true);
 
         Shape3D wheel2 = (Shape3D) namedObjects.get("wheel2");
-        TransformGroup wheelTG2 = getWheelTG(movesCount, startTime, movesDuration, wheel2, true);
+        TransformGroup wheelTG2 = getWheelTG(wheel2, true);
 
         Shape3D wheel3 = (Shape3D) namedObjects.get("wheel3");
-        TransformGroup wheelTG3 = getWheelTG(movesCount, startTime, movesDuration, wheel3, false);
+        TransformGroup wheelTG3 = getWheelTG(wheel3, false);
 
         Shape3D wheel4 = (Shape3D) namedObjects.get("wheel4");
-        TransformGroup wheelTG4 = getWheelTG(movesCount, startTime, movesDuration, wheel4, false);
+        TransformGroup wheelTG4 = getWheelTG(wheel4, false);
 
         TransformGroup sceneGroup = new TransformGroup();
         sceneGroup.addChild(wheelTG1);
@@ -112,16 +111,30 @@ public class Car extends JFrame{
         carBranchGroup.addChild(whiteRotXformGroup);
         carStartTransformGroup.addChild(sceneGroup);
 
+        Transform3D transform3D = new Transform3D();
+        Transform3D rotationY = new Transform3D();
+        rotationY.rotY(Math.PI/2);
+        transform3D.mul(rotationY);
+        carBranchGroup.addChild(new TransformGroup(transform3D));
+
         // adding the car background to branch group
         BoundingSphere bounds = new BoundingSphere(new Point3d(120.0,250.0,100.0),Double.MAX_VALUE);
         carBackground.setApplicationBounds(bounds);
         carBranchGroup.addChild(carBackground);
 
+
+
+
         carBranchGroup.compile();
         su.addBranchGraph(carBranchGroup);
     }
 
-    public TransformGroup getWheelTG(int movesCount, int startTime, int movesDuration, Shape3D wheel, boolean isBack) {
+    public TransformGroup getWheelTG(Shape3D wheel, boolean isBack) {
+        // wheels
+        int movesCount = 100; // moves count
+        int movesDuration = 500; // moves for 0,3 seconds
+        int startTime = 0; // launch animation after timeStart seconds
+
         Alpha leg1_1RotAlpha = new Alpha(movesCount, Alpha.INCREASING_ENABLE, startTime, 0, movesDuration,0,0,0,0,0);
 
         TransformGroup wheelTG = new TransformGroup();
@@ -143,16 +156,17 @@ public class Car extends JFrame{
 
         Transform3D legRotAxis = new Transform3D();
         if (isBack) {
-            legRotAxis.set(new Vector3d(0, -0.225, -0.54));
+            legRotAxis.set(new Vector3d(0, -0.131, 0.53));
         } else {
-            legRotAxis.set(new Vector3d(0, -0.225, 0.64));
+            legRotAxis.set(new Vector3d(0, -0.131, -0.525));
         }
-        legRotAxis.setRotation(new AxisAngle4d(0, 0, -10, Math.PI/2));
+        legRotAxis.setRotation(new AxisAngle4d(0, 0, -10, -Math.PI/2));
 
-        RotationInterpolator wheel1rot = new RotationInterpolator(leg1_1RotAlpha, wheelTG, legRotAxis,(float) 0.0f, (float) Math.PI*2); // Math.PI*2
-        wheel1rot.setSchedulingBounds(new BoundingSphere(new Point3d(0.0,0.0,0.0),Double.MAX_VALUE));
+
+        RotationInterpolator wheelrot = new RotationInterpolator(leg1_1RotAlpha, wheelTG, legRotAxis,(float) 0.0f, (float) Math.PI*2); // Math.PI*2
+        wheelrot.setSchedulingBounds(new BoundingSphere(new Point3d(0.0,0.0,0.0),Double.MAX_VALUE));
         wheelTG.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-        wheelTG.addChild(wheel1rot);
+        wheelTG.addChild(wheelrot);
         return wheelTG;
     }
 
@@ -189,6 +203,7 @@ public class Car extends JFrame{
                 new Point3d(0.0,0.0,0.0),1.0));
 
         group.addChild(interpolator);
+//        group.removeChild(interpolator);
         group.addChild(node);
 
         return group;
@@ -196,7 +211,11 @@ public class Car extends JFrame{
     }
 
     public static void main(String[] args) {
-        Car start = new Car();
+        try {
+            Car window = new Car();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
 }

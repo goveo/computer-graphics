@@ -22,7 +22,8 @@ public class BallAnimation implements ActionListener, KeyListener {
     private boolean space = false;
 
     private float x = 0;
-    private float y = 0; private int angle = 0;
+    private float y = 0;
+    private int angle = 0;
 
     private float radius = 1f;
     private double scale = 1;
