@@ -98,9 +98,30 @@ public class Car extends JFrame{
         sceneGroup.addChild(wheelTG2);
         sceneGroup.addChild(wheelTG3);
         sceneGroup.addChild(wheelTG4);
+
         TransformGroup tgBody = new TransformGroup();
         Shape3D carBodyShape = (Shape3D) namedObjects.get("body");
+        Appearance appearance = new Appearance();
+        Material material = new Material();
+        material.setDiffuseColor(new Color3f(0.45f, 0.05f, 0.05f));
+        material.setLightingEnable(true);
+
+        appearance.setMaterial(material);
+        carBodyShape.setAppearance(appearance);
+
         tgBody.addChild(carBodyShape.cloneTree());
+
+        Shape3D carGlassShape = (Shape3D) namedObjects.get("glass");
+        Appearance glassAppearance = new Appearance();
+        Material glassMaterial = new Material();
+        glassMaterial.setDiffuseColor(new Color3f(0.65f, 0.65f, 0.55f));
+
+        glassAppearance.setMaterial(glassMaterial);
+        carGlassShape.setAppearance(glassAppearance);
+
+        tgBody.addChild(carBodyShape.cloneTree());
+        tgBody.addChild(carGlassShape.cloneTree());
+
         sceneGroup.addChild(tgBody.cloneTree());
 
         TransformGroup whiteTransXformGroup = translate(
@@ -122,48 +143,40 @@ public class Car extends JFrame{
         carBackground.setApplicationBounds(bounds);
         carBranchGroup.addChild(carBackground);
 
-
-
-
         carBranchGroup.compile();
         su.addBranchGraph(carBranchGroup);
     }
 
     public TransformGroup getWheelTG(Shape3D wheel, boolean isBack) {
         // wheels
-        int movesCount = 100; // moves count
-        int movesDuration = 500; // moves for 0,3 seconds
-        int startTime = 0; // launch animation after timeStart seconds
-
-        Alpha leg1_1RotAlpha = new Alpha(movesCount, Alpha.INCREASING_ENABLE, startTime, 0, movesDuration,0,0,0,0,0);
-
+        Alpha wheelRotAlpha = new Alpha(100, Alpha.INCREASING_ENABLE, 0, 0, 500,0,0,0,0,0);
         TransformGroup wheelTG = new TransformGroup();
-
         Appearance wheelAppearance = new Appearance();
-
         Material material = new Material();
         material.setEmissiveColor(new Color3f(0.05f, 0.05f, 0.05f));
         material.setAmbientColor(new Color3f(0.05f, 0.05f, 0.05f));
         material.setDiffuseColor(new Color3f(0.05f, 0.05f, 0.05f));
-//        material.setSpecularColor(new Color3f(0.05f, 0.05f, 0.05f));
-//        material.setShininess(128);
         material.setLightingEnable(true);
-
         wheelAppearance.setMaterial(material);
         wheel.setAppearance(wheelAppearance);
 
         wheelTG.addChild(wheel.cloneTree());
 
-        Transform3D legRotAxis = new Transform3D();
+        Transform3D rotationAxis = new Transform3D();
         if (isBack) {
-            legRotAxis.set(new Vector3d(0, -0.131, 0.53));
+            rotationAxis.set(new Vector3d(0, -0.131, 0.53));
         } else {
-            legRotAxis.set(new Vector3d(0, -0.131, -0.525));
+            rotationAxis.set(new Vector3d(0, -0.131, -0.525));
         }
-        legRotAxis.setRotation(new AxisAngle4d(0, 0, -10, -Math.PI/2));
+        rotationAxis.setRotation(new AxisAngle4d(0, 0, -10, -Math.PI/2));
 
 
-        RotationInterpolator wheelrot = new RotationInterpolator(leg1_1RotAlpha, wheelTG, legRotAxis,(float) 0.0f, (float) Math.PI*2); // Math.PI*2
+        RotationInterpolator wheelrot = new RotationInterpolator(wheelRotAlpha,
+                                                                 wheelTG,
+                                                                 rotationAxis,
+                                                                 0.0f,
+                                                                 (float) Math.PI*2);
+
         wheelrot.setSchedulingBounds(new BoundingSphere(new Point3d(0.0,0.0,0.0),Double.MAX_VALUE));
         wheelTG.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
         wheelTG.addChild(wheelrot);
